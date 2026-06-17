@@ -19,3 +19,8 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Windows build artifacts
+*.exe
+*.o
+*.obj
