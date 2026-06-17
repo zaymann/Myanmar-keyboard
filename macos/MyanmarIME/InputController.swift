@@ -68,7 +68,7 @@ class InputController: IMKInputController {
     }
 
     private func isRomanInput(_ ch: Character) -> Bool {
-        if ch == "." || ch == ":" { return true }
+        if ch == "." || ch == ":" || ch == "_" { return true }  // tones + stacker
         return ("a"..."z").contains(ch) || ("A"..."Z").contains(ch)
     }
 

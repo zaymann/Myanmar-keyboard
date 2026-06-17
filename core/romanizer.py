@@ -101,6 +101,10 @@ def _convert_word(word):
             out.append(TONES[c]); i += 1; continue
         if c == "N":
             out.append(ANUSVARA); i += 1; continue
+        if c == "_":
+            # stacker: pull the following consonant under the previous one
+            # (kinzi keeps the preceding asat; plain stacking does not).
+            out.append(STACK); i += 1; continue
         if not c.isalpha():
             out.append(c); i += 1; continue
 
@@ -148,7 +152,15 @@ def _convert_word(word):
         fkey, fval, j = _match_longest(FINALS, word, i)
         if fkey is not None:
             after = word[j] if j < n else ""
-            if after not in VOWEL_LETTERS and after not in MEDIALS:
+            if after == "_":
+                # this final stacks onto the next consonant.
+                #   kinzi (င) keeps its asat: င ် ္
+                #   any other consonant stacks bare:  C ္
+                syl += fval
+                if fval == "င":
+                    syl += ASAT
+                i = j
+            elif after not in VOWEL_LETTERS and after not in MEDIALS:
                 syl += fval + ASAT
                 i = j
                 # trailing tone after a final (e.g. "kann:")
@@ -198,6 +210,11 @@ if __name__ == "__main__":
         ("kaN",    "ကံ"),                    # ကံ
         ("kat",    "ကတ်"),              # ကတ်
         ("kaung",  "ကောင်"),  # ကောင်
+        # --- stacking / kinzi ---
+        ("mng_galar", "မင်္ဂလာ"),   # kinzi: မင်္ဂလာ
+        ("bud_dha",   "ဗုဒ္ဓ"),         # stack: ဗုဒ္ဓ
+        ("pat_ti",    "ပတ္တိ"),         # stack: ပတ္တိ
+        ("kak_ka",    "ကက္က"),         # stack: ကက္က
     ]
     if len(sys.argv) > 1:
         print(convert(" ".join(sys.argv[1:])))

@@ -18,9 +18,11 @@ namespace myanmar {
 
 // UTF-8 building blocks
 inline const char* ASAT     = "\xE1\x80\xBA"; // ်
+inline const char* VIRAMA   = "\xE1\x80\xB9"; // ္  stacking virama (pat-sint / kinzi)
 inline const char* ANUSVARA = "\xE1\x80\xB6"; // ံ
 inline const char* DOT      = "\xE1\x80\xB7"; // ့
 inline const char* VISARGA  = "\xE1\x80\xB8"; // း
+inline const char* NGA      = "\xE1\x80\x84"; // င  (kinzi base)
 
 struct Tables {
     std::unordered_map<std::string, std::string> onsets, medials, vowels, finals, tones;
@@ -92,6 +94,7 @@ inline std::string convertWord(const std::string& word) {
         std::string cs(1, c);
         if (T.tones.count(cs)) { out += T.tones.at(cs); ++i; continue; }
         if (c == 'N') { out += ANUSVARA; ++i; continue; }
+        if (c == '_') { out += VIRAMA; ++i; continue; }  // stacker
         if (!isAlpha(c)) { out += c; ++i; continue; }
 
         std::string ons; size_t j;
@@ -125,12 +128,19 @@ inline std::string convertWord(const std::string& word) {
         std::string fval; size_t j3;
         if (matchLongest(T.finals, word, i, fval, j3)) {
             char after = (j3 < n) ? word[j3] : '\0';
-            bool vowelAfter  = T.vowelLetters.count(after) > 0;
-            bool medialAfter = T.medials.count(std::string(1, after)) > 0;
-            if (!vowelAfter && !medialAfter) {
-                syl += fval; syl += ASAT;
+            if (after == '_') {
+                // stacks onto the next consonant; kinzi (င) keeps its asat.
+                syl += fval;
+                if (fval == NGA) syl += ASAT;
                 i = j3;
-                if (i < n) { std::string ts(1, word[i]); if (T.tones.count(ts)) { syl += T.tones.at(ts); ++i; } }
+            } else {
+                bool vowelAfter  = T.vowelLetters.count(after) > 0;
+                bool medialAfter = T.medials.count(std::string(1, after)) > 0;
+                if (!vowelAfter && !medialAfter) {
+                    syl += fval; syl += ASAT;
+                    i = j3;
+                    if (i < n) { std::string ts(1, word[i]); if (T.tones.count(ts)) { syl += T.tones.at(ts); ++i; } }
+                }
             }
         }
         out += syl;

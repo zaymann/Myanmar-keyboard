@@ -74,6 +74,21 @@ A consonant that is **not** followed by a vowel becomes a final (gets ◌်):
 
 **Anusvara** (ံ): type a capital **`N`** → `kaN` → ကံ
 
+## 6. Stacked consonants & kinzi / ပါဌ်ဆင့် နှင့် ကင်းစီး
+
+Use an underscore **`_`** to stack the next consonant under the previous one.
+
+| type | result | note |
+|------|--------|------|
+| `mng_galar` | မင်္ဂလာ | **kinzi** — `ng` keeps its ◌် and the next letter sits under it |
+| `bud_dha`   | ဗုဒ္ဓ | stacked ဒ္ဓ (Pali) |
+| `pat_ti`    | ပတ္တိ | stacked တ္တ |
+| `kak_ka`    | ကက္က | stacked က္က |
+
+Rule: write the syllable up to the consonant, then `_`, then the next
+consonant. **Kinzi** (the little ◌င်္ on top, as in မင်္ဂလာ) happens
+automatically when the consonant before `_` is **`ng`**.
+
 ---
 
 ## Tips / အကြံပြုချက်
@@ -82,9 +97,8 @@ A consonant that is **not** followed by a vowel becomes a final (gets ◌်):
 - `kya naw` → ကျ နော
 - If something looks wrong, press **Backspace** to edit before committing.
 
-## Known limitations (v1)
+## Known limitations
 
-- Stacked consonants (ပါဌ်ဆင့် / kinzi like မင်္ဂလာ) are not yet auto-formed.
 - This is a rule-based transliterator, not a dictionary — spelling follows the
   rules above, so a few words with irregular spelling must be typed by their
-  letters.
+  letters (and stacking uses the explicit `_` notation in section 6).

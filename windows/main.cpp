@@ -127,12 +127,17 @@ static void SetEnabled(bool on) {
 
 // ---- the keyboard hook -----------------------------------------------------
 static bool IsRomanVk(DWORD vk, char& outCh) {
-    if (vk >= 'A' && vk <= 'Z') {                 // letters -> lowercase
-        outCh = (char)('a' + (vk - 'A')); return true;
+    if (vk >= 'A' && vk <= 'Z') {                 // letters (keep case for 'N')
+        bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        bool caps  = (GetKeyState(VK_CAPITAL) & 1) != 0;
+        bool upper = shift ^ caps;
+        outCh = upper ? (char)vk : (char)('a' + (vk - 'A'));
+        return true;
     }
     bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-    if (vk == VK_OEM_PERIOD) { outCh = '.'; return true; }      // .
-    if (vk == VK_OEM_1 && shift) { outCh = ':'; return true; }  // : (shift+;)
+    if (vk == VK_OEM_PERIOD) { outCh = '.'; return true; }          // .
+    if (vk == VK_OEM_1 && shift) { outCh = ':'; return true; }      // : (shift+;)
+    if (vk == VK_OEM_MINUS && shift) { outCh = '_'; return true; }  // _ stacker (shift+-)
     return false;
 }
 

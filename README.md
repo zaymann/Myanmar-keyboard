@@ -36,6 +36,8 @@ See **[core/ROMANIZATION.md](core/ROMANIZATION.md)**. Quick examples:
 | `ko`     | ကို |
 | `kaung`  | ကောင် |
 | `kaN`    | ကံ |
+| `mng_galar` | မင်္ဂလာ |
+| `bud_dha`   | ဗုဒ္ဓ |
 
 Type one syllable, then **space** to commit. **Backspace** edits before committing.
 
@@ -72,6 +74,6 @@ for details.
 - ✅ Core conversion engine — tested, identical on all 3 platforms
 - ✅ macOS input method — builds & installs on this machine
 - ✅ Windows helper app — complete source (build on a Windows PC with MinGW)
-- ⏳ Stacked consonants / kinzi (e.g. မင်္ဂလာ) — planned for v2
+- ✅ Stacked consonants / kinzi (e.g. မင်္ဂလာ, ဗုဒ္ဓ) via the `_` stacker
 
 Credit: romanization approach inspired by the **WaitZar** project (yathit/waitzar).

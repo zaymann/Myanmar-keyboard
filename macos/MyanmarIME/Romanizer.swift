@@ -7,10 +7,12 @@ import Foundation
 enum Romanizer {
 
     // MARK: Unicode building blocks
-    static let ASAT     = "\u{103A}"   // ်  killer / virama
+    static let ASAT     = "\u{103A}"   // ်  killer
+    static let VIRAMA   = "\u{1039}"   // ္  stacking virama (pat-sint / kinzi)
     static let ANUSVARA = "\u{1036}"   // ံ
     static let DOT      = "\u{1037}"   // ့  creaky tone
     static let VISARGA  = "\u{1038}"   // း  high tone
+    static let NGA      = "\u{1004}"   // င  (kinzi base)
 
     // MARK: Tables (longest key matched first)
     static let onsets: [String: String] = [
@@ -71,6 +73,7 @@ enum Romanizer {
             let c = w[i]
             if let t = tones[String(c)] { out += t; i += 1; continue }
             if c == "N" { out += ANUSVARA; i += 1; continue }
+            if c == "_" { out += VIRAMA; i += 1; continue }  // stacker
             if !c.isLetter { out.append(c); i += 1; continue }
 
             // 1) onset
@@ -99,12 +102,19 @@ enum Romanizer {
             // 5) final
             if let (_, fval, j3) = matchLongest(finals, w, i) {
                 let after: Character? = (j3 < n) ? w[j3] : nil
-                let vowelAfter = after != nil && vowelLetters.contains(after!)
-                let medialAfter = after != nil && medials[String(after!)] != nil
-                if !vowelAfter && !medialAfter {
-                    syl += fval + ASAT
+                if after == "_" {
+                    // stacks onto the next consonant; kinzi (င) keeps its asat.
+                    syl += fval
+                    if fval == NGA { syl += ASAT }
                     i = j3
-                    if i < n, let t = tones[String(w[i])] { syl += t; i += 1 }
+                } else {
+                    let vowelAfter = after != nil && vowelLetters.contains(after!)
+                    let medialAfter = after != nil && medials[String(after!)] != nil
+                    if !vowelAfter && !medialAfter {
+                        syl += fval + ASAT
+                        i = j3
+                        if i < n, let t = tones[String(w[i])] { syl += t; i += 1 }
+                    }
                 }
             }
             out += syl
