@@ -14,5 +14,9 @@ guard let server = IMKServer(name: kConnectionName, bundleIdentifier: bundleID) 
 }
 _ = server // keep a strong reference for the lifetime of the process
 
-NSLog("MyanmarIME: server started (\(bundleID))")
+// Load user customisations from ~/.myanmar-ime/custom.txt (if present).
+let customPath = NSHomeDirectory() + "/.myanmar-ime/custom.txt"
+let loaded = Romanizer.loadCustom(path: customPath)
+NSLog("MyanmarIME: server started (\(bundleID)), \(loaded) custom rules")
+
 NSApplication.shared.run()

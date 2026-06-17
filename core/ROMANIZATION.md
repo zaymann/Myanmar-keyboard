@@ -97,8 +97,35 @@ automatically when the consonant before `_` is **`ng`**.
 - `kya naw` → ကျ နော
 - If something looks wrong, press **Backspace** to edit before committing.
 
+## 7. Customise your own rules / ကိုယ်ပိုင်ဇယား ထည့်ခြင်း
+
+You can add your own shortcuts and override any mapping — no rebuild needed.
+
+1. Copy **[custom.sample.txt](custom.sample.txt)** to:
+   - macOS: `~/.myanmar-ime/custom.txt`
+   - Windows: `%USERPROFILE%\.myanmar-ime\custom.txt`
+2. Edit it. Each line is `roman = မြန်မာ`. A `[section]` header chooses what
+   you edit: `[words]` (whole-word shortcuts, the default), `[onset]`,
+   `[vowel]`, `[final]`.
+3. Restart the keyboard (re-enable the input source / re-run the .exe).
+
+Example:
+```
+[words]
+mingalar = မင်္ဂလာ
+mm       = မြန်မာ
+
+[onset]
+sh = ရှ
+```
+Now `mingalar` → မင်္ဂလာ, `mm` → မြန်မာ, `sha` → ရှ. Whole-word shortcuts always
+win over the built-in rules; everything else still works as normal.
+
+---
+
 ## Known limitations
 
 - This is a rule-based transliterator, not a dictionary — spelling follows the
   rules above, so a few words with irregular spelling must be typed by their
-  letters (and stacking uses the explicit `_` notation in section 6).
+  letters (and stacking uses the explicit `_` notation in section 6). For words
+  you type often, add them as `[words]` shortcuts (section 7).

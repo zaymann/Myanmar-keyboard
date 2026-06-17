@@ -1,0 +1,39 @@
+# ============================================================
+#  custom.txt  —  your own romanization rules
+# ============================================================
+#
+#  Copy this file to:
+#     macOS / Linux :  ~/.myanmar-ime/custom.txt
+#     Windows       :  %USERPROFILE%\.myanmar-ime\custom.txt
+#
+#  Then edit it and restart the keyboard. Lines look like:
+#       roman = မြန်မာ
+#  Anything after #  is a comment. Blank lines are ignored.
+#
+#  A [section] header decides what you are editing:
+#     [words]   whole-word shortcuts   (default if no header)
+#     [onset]   consonants
+#     [vowel]   vowels
+#     [final]   final consonants
+# ============================================================
+
+[words]
+# Type the roman on the left, get the Myanmar on the right exactly.
+mingalar   = မင်္ဂလာ
+mingalarpar = မင်္ဂလာပါ
+nay        = နေ
+kaunglar   = ကောင်းလား
+naywdk     = နေ့စွဲ
+kyaw       = ကျော်
+mm         = မြန်မာ
+
+[onset]
+# Add or change consonants. (longest match wins)
+sh = ရှ
+
+[vowel]
+# Add or change vowels.
+# oh = ိုး
+
+[final]
+# Add or change final consonants.

@@ -79,6 +79,47 @@ TONES = {".": DOT_BELOW, ":": VISARGA}
 
 VOWEL_LETTERS = set("aeiou")
 
+# ---- User customisation ------------------------------------------------------
+# Whole-word shortcuts: an exact roman token -> exact Myanmar output. Checked
+# before syllable parsing, so it always wins. Populated from a custom file.
+WORDS = {}
+
+# Map a [section] name to the table it edits.
+_SECTIONS = {"words": WORDS, "onset": ONSETS, "vowel": VOWELS, "final": FINALS}
+
+
+def load_custom(path):
+    """Load user customisations from a simple text file. Returns count loaded.
+
+    Format (see core/custom.sample.txt):
+        # comment
+        [words]            <- section header; default section is [words]
+        mingalar = မင်္ဂလာ
+        [onset]
+        sh = ရှ
+    """
+    import os
+    if not path or not os.path.exists(path):
+        return 0
+    section = WORDS
+    count = 0
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("[") and line.endswith("]"):
+                section = _SECTIONS.get(line[1:-1].strip().lower(), section)
+                continue
+            if "=" not in line:
+                continue
+            key, _, val = line.partition("=")
+            key, val = key.strip(), val.strip()
+            if key:
+                section[key] = val
+                count += 1
+    return count
+
 
 def _match_longest(table, s, i):
     """Return (key, value, newindex) for the longest table key matching at i."""
@@ -91,6 +132,9 @@ def _match_longest(table, s, i):
 
 def _convert_word(word):
     """Convert one lowercase roman 'word' (letters + . : only) to Unicode."""
+    # whole-word override wins over the rules
+    if word in WORDS:
+        return WORDS[word]
     out = []
     i = 0
     n = len(word)

@@ -20,6 +20,7 @@
 #include <shellapi.h>
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include "../core/romanizer.h"
 
 // ---- globals ---------------------------------------------------------------
@@ -219,6 +220,10 @@ static LRESULT CALLBACK MainProc(HWND h, UINT m, WPARAM w, LPARAM l) {
 }
 
 int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, PWSTR, int) {
+    // Load user customisations from %USERPROFILE%\.myanmar-ime\custom.txt
+    if (const char* up = getenv("USERPROFILE"))
+        myanmar::loadCustom(std::string(up) + "\\.myanmar-ime\\custom.txt");
+
     // hidden main window
     WNDCLASSW wc = {}; wc.lpfnWndProc = MainProc; wc.hInstance = hInst;
     wc.lpszClassName = MAIN_CLASS; RegisterClassW(&wc);

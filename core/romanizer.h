@@ -13,6 +13,8 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <fstream>
+#include <cctype>
 
 namespace myanmar {
 
@@ -26,6 +28,7 @@ inline const char* NGA      = "\xE1\x80\x84"; // င  (kinzi base)
 
 struct Tables {
     std::unordered_map<std::string, std::string> onsets, medials, vowels, finals, tones;
+    std::unordered_map<std::string, std::string> words;  // whole-word overrides
     std::vector<std::string> medialOrder;
     std::unordered_set<char> vowelLetters;
 
@@ -67,7 +70,48 @@ struct Tables {
     }
 };
 
-inline const Tables& tables() { static Tables t; return t; }
+inline Tables& tables() { static Tables t; return t; }
+
+// ---- user customisation ----------------------------------------------------
+inline void trimInPlace(std::string& s) {
+    auto notspace = [](unsigned char c){ return !std::isspace(c); };
+    while (!s.empty() && std::isspace((unsigned char)s.back())) s.pop_back();
+    size_t i = 0; while (i < s.size() && std::isspace((unsigned char)s[i])) ++i;
+    s.erase(0, i);
+    // strip a leading UTF-8 BOM if present
+    if (s.size() >= 3 && (unsigned char)s[0]==0xEF && (unsigned char)s[1]==0xBB && (unsigned char)s[2]==0xBF)
+        s.erase(0, 3);
+    (void)notspace;
+}
+
+// Load a custom-rules file (see core/custom.sample.txt). Returns rules loaded.
+inline int loadCustom(const std::string& path) {
+    std::ifstream f(path);
+    if (!f) return 0;
+    Tables& T = tables();
+    std::unordered_map<std::string,std::string>* section = &T.words;
+    std::string line; int count = 0;
+    while (std::getline(f, line)) {
+        trimInPlace(line);
+        if (line.empty() || line[0] == '#') continue;
+        if (line.front() == '[' && line.back() == ']') {
+            std::string s = line.substr(1, line.size() - 2);
+            trimInPlace(s);
+            for (char& ch : s) ch = (char)std::tolower((unsigned char)ch);
+            if (s == "words") section = &T.words;
+            else if (s == "onset") section = &T.onsets;
+            else if (s == "vowel") section = &T.vowels;
+            else if (s == "final") section = &T.finals;
+            continue;
+        }
+        size_t eq = line.find('=');
+        if (eq == std::string::npos) continue;
+        std::string key = line.substr(0, eq), val = line.substr(eq + 1);
+        trimInPlace(key); trimInPlace(val);
+        if (!key.empty()) { (*section)[key] = val; ++count; }
+    }
+    return count;
+}
 
 // longest-match (len 4..1) lookup at position i in s
 inline bool matchLongest(const std::unordered_map<std::string,std::string>& tbl,
@@ -87,6 +131,8 @@ inline bool isAlpha(char c) { return (c>='a'&&c<='z')||(c>='A'&&c<='Z'); }
 
 inline std::string convertWord(const std::string& word) {
     const Tables& T = tables();
+    auto wit = T.words.find(word);          // whole-word override wins
+    if (wit != T.words.end()) return wit->second;
     std::string out;
     size_t i = 0, n = word.size();
     while (i < n) {

@@ -4,7 +4,7 @@ import Foundation
 ///
 /// This is a 1:1 port of core/romanizer.py and the C++ engine. Keep all three
 /// in sync — see ROMANIZATION.md for the human-readable specification.
-enum Romanizer {
+struct Romanizer {
 
     // MARK: Unicode building blocks
     static let ASAT     = "\u{103A}"   // ်  killer
@@ -15,7 +15,9 @@ enum Romanizer {
     static let NGA      = "\u{1004}"   // င  (kinzi base)
 
     // MARK: Tables (longest key matched first)
-    static let onsets: [String: String] = [
+    static var words: [String: String] = [:]   // whole-word overrides
+
+    static var onsets: [String: String] = [
         "kh": "ခ", "g": "ဂ", "ng": "င", "k": "က",
         "hs": "ဆ", "ss": "ဆ", "s": "စ", "z": "ဇ",
         "ny": "ည",
@@ -34,7 +36,7 @@ enum Romanizer {
     // canonical Unicode storage order
     static let medialOrder = ["\u{103B}", "\u{103C}", "\u{103D}", "\u{103E}"]
 
-    static let vowels: [String: String] = [
+    static var vowels: [String: String] = [
         "aung": "ောင်", "aa": "ာ", "ar": "ာ",
         "ai": "ဲ", "au": "ော", "aw": "ော",
         "ay": "ေ", "ee": "ီ", "ii": "ီ",
@@ -43,7 +45,7 @@ enum Romanizer {
         "i": "ိ", "u": "ု", "a": "",
     ]
 
-    static let finals: [String: String] = [
+    static var finals: [String: String] = [
         "ng": "င", "ny": "ည",
         "k": "က", "s": "စ", "t": "တ", "n": "န",
         "p": "ပ", "m": "မ", "y": "ယ", "w": "ဝ",
@@ -65,6 +67,7 @@ enum Romanizer {
     }
 
     private static func convertWord(_ word: String) -> String {
+        if let override = words[word] { return override }   // whole-word wins
         let w = Array(word)
         let n = w.count
         var out = ""
@@ -120,6 +123,34 @@ enum Romanizer {
             out += syl
         }
         return out
+    }
+
+    /// Load a custom-rules file (see core/custom.sample.txt). Returns rules loaded.
+    @discardableResult
+    static func loadCustom(path: String) -> Int {
+        guard let content = try? String(contentsOfFile: path, encoding: .utf8) else { return 0 }
+        var section = "words"
+        var count = 0
+        for raw in content.split(separator: "\n", omittingEmptySubsequences: false) {
+            let line = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            if line.isEmpty || line.hasPrefix("#") { continue }
+            if line.hasPrefix("[") && line.hasSuffix("]") {
+                section = String(line.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces).lowercased()
+                continue
+            }
+            guard let eq = line.firstIndex(of: "=") else { continue }
+            let key = String(line[..<eq]).trimmingCharacters(in: .whitespaces)
+            let val = String(line[line.index(after: eq)...]).trimmingCharacters(in: .whitespaces)
+            if key.isEmpty { continue }
+            switch section {
+            case "onset": onsets[key] = val
+            case "vowel": vowels[key] = val
+            case "final": finals[key] = val
+            default:      words[key]  = val
+            }
+            count += 1
+        }
+        return count
     }
 
     /// Convert a full roman string to Myanmar Unicode, preserving whitespace.
