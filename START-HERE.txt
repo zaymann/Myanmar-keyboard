@@ -1,0 +1,3 @@
+ဒီ folder ထဲမှာ သင့် Myanmar keyboard code တွေ ရေး/သိမ်းပါ။
+ပြီးရင် Claude ကို "push လုပ်ပေး" သို့ "GitHub မှာ သိမ်းပေး" လို့ပြောပါ။
+Claude က ဒီ folder ထဲက ဖိုင်အားလုံးကို github.com/zaymann/Myanmar-keyboard ပေါ် တင်ပေးပါမယ်။
